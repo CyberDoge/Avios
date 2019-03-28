@@ -3,6 +3,7 @@ package io.ssau.team.Avios.service;
 import io.ssau.team.Avios.dao.ThemeDao;
 import io.ssau.team.Avios.dao.UserDao;
 import io.ssau.team.Avios.model.Theme;
+import io.ssau.team.Avios.model.User;
 import io.ssau.team.Avios.model.json.ThemeJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,8 +37,21 @@ public class ThemeService {
         return themeDao.getThemesFrom(index).stream().map(ThemeJson::new).collect(Collectors.toList());
     }
 
+    //todo разбораться когда удалять
     public ThemeJson getReadyTheme(Integer userId) {
+        User user = userDao.getUserById(userId);
+        for (Integer voteDown : user.getVoteDownThemes()) {
+            Theme theme = themeDao.getById(voteDown);
+            List<Integer> votedYes = theme.getVotedYes();
+            if (votedYes.size() != 0) {
+
+            }
+        }
+        for (Integer voteUp : user.getVoteUpThemes()) {
+
+        }
         return null;
+
     }
 
     public boolean subscribeToTheme(Integer id, Integer userId, boolean agree) {
