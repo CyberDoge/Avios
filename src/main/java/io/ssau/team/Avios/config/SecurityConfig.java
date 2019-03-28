@@ -25,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterAfter(authFilter(), FilterSecurityInterceptor.class)
                 .authorizeRequests().antMatchers("/login").permitAll().and()
                 .authorizeRequests().antMatchers("/register").permitAll().and()
-                .authorizeRequests().antMatchers("/**").authenticated().and()
+                .authorizeRequests().antMatchers("/**").permitAll().and()
                 .csrf().disable();
     }
 

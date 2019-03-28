@@ -33,5 +33,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body("login: " +
                 SecurityContextHolder.getContext().getAuthentication().getName());
     }
-
 }
