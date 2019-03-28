@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Repository
@@ -31,5 +32,18 @@ public class UserDao {
         User user = new User(users.size()+1, username);
         users.add(user);
         return user;
+    }
+
+    public void subscribeToTheme(Integer id, Integer userId, boolean agree) {
+        User user = getUserById(userId);
+        if(agree){
+            user.getVoteUpThemes().add(id);
+        }else {
+            user.getVoteDownThemes().add(id);
+        }
+    }
+
+    public User getUserById(Integer userId){
+        return users.stream().filter(user->Objects.equals(user.getId(), userId)).findFirst().orElseThrow();
     }
 }
