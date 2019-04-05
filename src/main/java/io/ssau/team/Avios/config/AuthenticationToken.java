@@ -41,7 +41,7 @@ public class AuthenticationToken extends AbstractAuthenticationToken {
         return token;
     }
 
-    private User getUser() {
+    public User getUser() {
         return user;
     }
 }

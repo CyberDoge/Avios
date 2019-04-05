@@ -37,9 +37,9 @@ public class UserDao {
     public void subscribeToTheme(Integer id, Integer userId, boolean agree) {
         User user = getUserById(userId);
         if(agree){
-            user.getVoteUpThemes().add(id);
+            user.getVoteYesThemes().add(id);
         }else {
-            user.getVoteDownThemes().add(id);
+            user.getVoteNoThemes().add(id);
         }
     }
 
