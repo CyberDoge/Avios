@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public class ThemeDao {
-    private static final List<Theme> themes = new ArrayList<>();
+    private final List<Theme> themes = new ArrayList<>();
 
     @PostConstruct
     public void init() {
