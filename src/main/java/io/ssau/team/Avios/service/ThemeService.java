@@ -1,12 +1,13 @@
 package io.ssau.team.Avios.service;
 
+import io.ssau.team.Avios.dao.RoomDao;
 import io.ssau.team.Avios.dao.ThemeDao;
 import io.ssau.team.Avios.dao.UserDao;
 import io.ssau.team.Avios.model.Theme;
-import io.ssau.team.Avios.model.User;
 import io.ssau.team.Avios.model.json.ThemeJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -17,12 +18,19 @@ import java.util.stream.Collectors;
 public class ThemeService {
 
     private ThemeDao themeDao;
+    private RoomDao roomDao;
     private UserDao userDao;
 
     @Autowired
-    public ThemeService(ThemeDao themeDao, UserDao userDao) {
+    public ThemeService(ThemeDao themeDao, RoomDao roomDao, UserDao userDao) {
         this.themeDao = themeDao;
+        this.roomDao = roomDao;
         this.userDao = userDao;
+    }
+
+    @Scheduled(fixedDelay = 5000)
+    public void createRoom() {
+
     }
 
     public ThemeJson createTheme(ThemeJson themeJson) {
@@ -37,21 +45,9 @@ public class ThemeService {
         return themeDao.getThemesFrom(index).stream().map(ThemeJson::new).collect(Collectors.toList());
     }
 
-    //todo разбораться когда удалять
     public ThemeJson getReadyTheme(Integer userId) {
-        User user = userDao.getUserById(userId);
-        for (Integer voteDown : user.getVoteDownThemes()) {
-            Theme theme = themeDao.getById(voteDown);
-            List<Integer> votedYes = theme.getVotedYes();
-            if (votedYes.size() != 0) {
-
-            }
-        }
-        for (Integer voteUp : user.getVoteUpThemes()) {
-
-        }
-        return null;
-
+        return roomDao.getByUserId(userId)
+                .map(room -> new ThemeJson(themeDao.getById(room.getThemeId()))).orElse(null);
     }
 
     public boolean subscribeToTheme(Integer id, Integer userId, boolean agree) {
