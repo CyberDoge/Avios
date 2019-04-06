@@ -20,7 +20,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {AviosApplication.class, SecurityConfig.class})
+@ContextConfiguration(classes = {AnviosApplication.class, SecurityConfig.class})
 @WebAppConfiguration
 public class LoginTest {
 

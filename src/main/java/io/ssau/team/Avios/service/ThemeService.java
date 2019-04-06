@@ -3,6 +3,7 @@ package io.ssau.team.Avios.service;
 import io.ssau.team.Avios.dao.RoomDao;
 import io.ssau.team.Avios.dao.ThemeDao;
 import io.ssau.team.Avios.dao.UserDao;
+import io.ssau.team.Avios.model.Room;
 import io.ssau.team.Avios.model.Theme;
 import io.ssau.team.Avios.model.json.ThemeJson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,16 @@ public class ThemeService {
 
     @Scheduled(fixedDelay = 5000)
     public void createRoom() {
-
+        final List<Room> readyRooms = this.themeDao.getAll().parallelStream()
+                .filter(theme -> !theme.getVotedYes().isEmpty() && !theme.getVotedNo().isEmpty())
+                .map(theme -> {
+                    final Integer votedYesUserId = theme.getVotedYes().get(theme.getVotedYes().size() - 1);
+                    final Integer votedNoUserId = theme.getVotedNo().get(theme.getVotedNo().size() - 1);
+                    final Integer id = theme.getId();
+                    return new Room(id, votedYesUserId, votedNoUserId);
+                }).collect(Collectors.toList());
+        readyRooms.forEach(room -> themeDao.deleteById(room.getThemeId()));
+        roomDao.addAll(readyRooms);
     }
 
     public ThemeJson createTheme(ThemeJson themeJson) {

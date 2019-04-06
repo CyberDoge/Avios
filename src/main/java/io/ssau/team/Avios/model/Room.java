@@ -1,12 +1,12 @@
 package io.ssau.team.Avios.model;
 
 public class Room {
-    final private Integer id;
     final private Integer themeId;
     final private UserPair userPair;
+    private Integer id;
 
-    public Room(Integer id, Integer themeId, Integer votedYesUserId, Integer votedNoUserId) {
-        this.id = id;
+    public Room(Integer themeId, Integer votedYesUserId, Integer votedNoUserId) {
+
         this.themeId = themeId;
         this.userPair = new UserPair(votedYesUserId, votedNoUserId);
     }
@@ -25,6 +25,10 @@ public class Room {
 
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     private final class UserPair {

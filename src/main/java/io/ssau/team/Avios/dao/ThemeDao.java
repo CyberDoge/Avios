@@ -1,14 +1,13 @@
 package io.ssau.team.Avios.dao;
 
 import io.ssau.team.Avios.model.Theme;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class ThemeDao {
@@ -27,26 +26,35 @@ public class ThemeDao {
         return theme;
     }
 
-
-    public Theme getById(int id) {
-        return themes.get(id);
+    public void deleteById(Integer themeId) {
+        themes.removeIf(theme -> Objects.equals(themeId, theme.getId()));
     }
 
 
-    public ArrayList<Theme> getThemesFrom(int index) {
-        ArrayList<Theme> list = new ArrayList<>();
+    public Theme getById(int id) {
+        return themes.stream().filter(theme -> Objects.equals(theme.getId(), id)).findFirst().get();
+    }
+
+    public List<Theme> getAll() {
+        return themes;
+    }
+
+
+    public LinkedList<Theme> getThemesFrom(int index) {
+        //todo баг
+        LinkedList<Theme> listTheme = new LinkedList<>();
         if (index == 0) {
-            themes.add(getById(themes.size() - 1));
+            listTheme.add(themes.get(themes.size() - 1));
         } else if (index == 1) {
             if (themes.size() < 10) {
-                list.addAll(themes);
+                listTheme.addAll(themes);
             } else {
                 for (int i = themes.size() - 1; i > themes.size() - 11; i--) {
-                    list.add(themes.get(i));
+                    listTheme.push(themes.get(i));
                 }
             }
         }
-        return list;
+        return listTheme;
     }
 
     public void subscribeUserToTheme(Integer id, Integer userId, boolean agree) {

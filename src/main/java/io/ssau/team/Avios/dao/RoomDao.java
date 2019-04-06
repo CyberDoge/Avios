@@ -1,14 +1,20 @@
 package io.ssau.team.Avios.dao;
 
 import io.ssau.team.Avios.model.Room;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
+@Repository
 public class RoomDao {
     private final List<Room> rooms = new LinkedList<>();
 
     public void add(Room room) {
         rooms.add(room);
+    }
+
+    public void addAll(List<Room> roomList) {
+        this.rooms.addAll(roomList);
     }
 
     public void removeById(Integer id) {
