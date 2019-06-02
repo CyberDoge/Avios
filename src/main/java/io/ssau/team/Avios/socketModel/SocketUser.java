@@ -21,10 +21,11 @@ public class SocketUser implements Runnable, Closeable {
 
     public SocketUser(Socket socket, User user, Chat chat) throws IOException {
         this.socket = socket;
+        //socket.setSoTimeout(6000); todo timeout
         this.user = user;
         this.chat = chat;
-        inputStream = socket.getInputStream();
-        outputStream = socket.getOutputStream();
+        this.inputStream = socket.getInputStream();
+        this.outputStream = socket.getOutputStream();
     }
 
     public OutputStream getOutputStream() {
@@ -34,9 +35,11 @@ public class SocketUser implements Runnable, Closeable {
     @Override
     public void run() {
         try {
-            //todo если вышел игра заканчивается
-            String message = IOUtils.toString(inputStream, Charset.defaultCharset());
-            chat.readMessage(message, this);
+            //todo если вышел игра заканчивается, + while chat run
+            while (true) {
+                String message = IOUtils.toString(inputStream, Charset.defaultCharset());
+                chat.readMessage(message, this);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

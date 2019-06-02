@@ -15,6 +15,6 @@ public class ChatController {
 
     public void addChat(Chat chat) {
         chatList.push(chat);
-        chat.startChat();
+        chat.start();
     }
 }

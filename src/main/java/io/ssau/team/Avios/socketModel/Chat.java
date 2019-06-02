@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Chat implements Closeable {
+public class Chat extends Thread implements Closeable {
     private static final Random random = new Random();
     private SocketUser firstUser;
     private SocketUser secondUser;
@@ -16,36 +16,37 @@ public class Chat implements Closeable {
     private boolean ready = false;
     private OutputStream secondUserOutputStream;
     private OutputStream firstUserOutputStream;
-    private TimerTask task;
+    private Runnable task;
     private Timer timer;
 
     public Chat() {
         id = random.nextInt();
     }
 
-    public Integer getId() {
+    public Integer getCharId() {
         return id;
     }
 
-    public void startChat() {
+    public void run() {
         new Thread(firstUser).start();
         new Thread(secondUser).start();
         this.timer = new Timer(id.toString(), true);
         //таймер на 60 секунд
-        task = new TimerTask() {
+        task = () -> {
+            sendMessageToAll("timeout", false);
+        };
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                sendMessageToAll("timeout", false);
+                task.run();
             }
-        };
-        timer.schedule(task, 60000);
+        }, 6000);
     }
 
     public void readMessage(String message, SocketUser sender) {
         if (current == sender) {
             timer.cancel();
             sendMessageToAll(message, true);
-            timer.schedule(task, 60000);
         }
     }
 
@@ -77,7 +78,7 @@ public class Chat implements Closeable {
                 firstUser.sendMessage(String.valueOf(success));
                 secondUser.sendMessage(message);
             } else {
-                secondUser.sendMessage("recieved");
+                secondUser.sendMessage(String.valueOf(success));
                 firstUser.sendMessage(message);
             }
             changeCurrent();
@@ -92,5 +93,11 @@ public class Chat implements Closeable {
         } else {
             secondUser = firstUser;
         }
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                task.run();
+            }
+        }, 6000);
     }
 }
