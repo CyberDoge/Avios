@@ -15,6 +15,8 @@ public class TokenDao {
         tokens.put("123", "User");
         tokens.put("aaa", "Admin");
         tokens.put("0", "simple");
+        tokens.put("ae49a597-c0f3-496f-bd6b-c1770413068c", "first");
+        tokens.put("9803efd9-955d-4b2c-b4d9-12a86aac65a2", "second");
     }
 
     public boolean contains(String token) {

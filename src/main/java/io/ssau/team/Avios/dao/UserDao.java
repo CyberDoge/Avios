@@ -18,6 +18,8 @@ public class UserDao {
         users.add(new User(1, "User"));
         users.add(new User(2, "Admin"));
         users.add(new User(3, "simple"));
+        users.add(new User(4, "first"));
+        users.add(new User(5, "second"));
     }
 
     public boolean contains(String username) {

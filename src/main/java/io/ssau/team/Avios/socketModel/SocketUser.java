@@ -1,0 +1,48 @@
+package io.ssau.team.Avios.socketModel;
+
+import io.ssau.team.Avios.model.User;
+
+import java.io.*;
+import java.net.Socket;
+
+public class SocketUser implements Runnable, Closeable {
+    private BufferedReader reader;
+    private PrintWriter writer;
+    private Socket socket;
+    private User user;
+
+    private Chat chat;
+
+    public SocketUser(Socket socket, User user, Chat chat) throws IOException {
+        this.socket = socket;
+        //socket.setSoTimeout(6000); todo timeout
+        this.user = user;
+        this.chat = chat;
+        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        writer = new PrintWriter(socket.getOutputStream());
+
+    }
+
+
+    @Override
+    public void run() {
+        try {
+            while (!socket.isClosed()) {
+                chat.readMessage(reader.readLine(), this);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMessage(String message) {
+        writer.println(message);
+    }
+
+    @Override
+    public void close() throws IOException {
+        reader.close();
+        writer.close();
+        socket.close();
+    }
+}
