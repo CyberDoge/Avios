@@ -8,13 +8,16 @@ import java.util.TimerTask;
 
 public class Chat extends Thread implements Closeable {
     private static final Random random = new Random();
+    private static final Integer TIME_FOR_OUT = 60 * 1000;
     private SocketUser firstUser;
     private SocketUser secondUser;
     private SocketUser current;
+    private SocketUser opponent;
     private Integer id;
     private boolean ready = false;
     private Runnable task;
     private Timer timer;
+    private int rounds = 0;
 
     public Chat() {
         id = random.nextInt();
@@ -26,6 +29,7 @@ public class Chat extends Thread implements Closeable {
 
     public void run() {
         current = firstUser;
+        opponent = secondUser;
         new Thread(firstUser).start();
         new Thread(secondUser).start();
         this.timer = new Timer(true);
@@ -36,11 +40,11 @@ public class Chat extends Thread implements Closeable {
             public void run() {
                 task.run();
             }
-        }, 60000);
+        }, TIME_FOR_OUT);
     }
 
     public void readMessage(String message, SocketUser sender) {
-        if (message == null) {
+        if (rounds == 19 || message == null) {
             //todo end of game
         } else if (current == sender) {
             timer.cancel();
@@ -69,24 +73,22 @@ public class Chat extends Thread implements Closeable {
     }
 
     private void sendMessageToAll(String message, boolean success) {
-        if (current == firstUser) {
-            firstUser.sendMessage(String.valueOf(success));
-            secondUser.sendMessage(message);
-        } else {
-            secondUser.sendMessage(String.valueOf(success));
-            firstUser.sendMessage(message);
-        }
+        current.sendMessage(String.valueOf(success));
+        opponent.sendMessage(message);
         changeCurrent();
     }
 
     private void changeCurrent() {
-        current = current == firstUser ? secondUser : firstUser;
+        rounds++;
+        var tmp = current;
+        current = opponent;
+        opponent = tmp;
         timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 task.run();
             }
-        }, 6000);
+        }, TIME_FOR_OUT);
     }
 }

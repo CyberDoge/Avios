@@ -15,7 +15,6 @@ public class SocketUser implements Runnable, Closeable {
 
     public SocketUser(Socket socket, User user, Chat chat) throws IOException {
         this.socket = socket;
-        //socket.setSoTimeout(6000); todo timeout
         this.user = user;
         this.chat = chat;
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
