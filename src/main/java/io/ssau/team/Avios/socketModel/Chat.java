@@ -2,7 +2,6 @@ package io.ssau.team.Avios.socketModel;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,8 +13,6 @@ public class Chat extends Thread implements Closeable {
     private SocketUser current;
     private Integer id;
     private boolean ready = false;
-    private OutputStream secondUserOutputStream;
-    private OutputStream firstUserOutputStream;
     private Runnable task;
     private Timer timer;
 
@@ -23,28 +20,29 @@ public class Chat extends Thread implements Closeable {
         id = random.nextInt();
     }
 
-    public Integer getCharId() {
+    public Integer getChatId() {
         return id;
     }
 
     public void run() {
+        current = firstUser;
         new Thread(firstUser).start();
         new Thread(secondUser).start();
-        this.timer = new Timer(id.toString(), true);
+        this.timer = new Timer(true);
         //таймер на 60 секунд
-        task = () -> {
-            sendMessageToAll("timeout", false);
-        };
+        task = () -> sendMessageToAll("timeout", false);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 task.run();
             }
-        }, 6000);
+        }, 60000);
     }
 
     public void readMessage(String message, SocketUser sender) {
-        if (current == sender) {
+        if (message == null) {
+            //todo end of game
+        } else if (current == sender) {
             timer.cancel();
             sendMessageToAll(message, true);
         }
@@ -59,8 +57,6 @@ public class Chat extends Thread implements Closeable {
             this.firstUser = socketUser;
         } else {
             this.secondUser = socketUser;
-            secondUserOutputStream = secondUser.getOutputStream();
-            firstUserOutputStream = firstUser.getOutputStream();
             this.ready = true;
         }
     }
@@ -73,26 +69,19 @@ public class Chat extends Thread implements Closeable {
     }
 
     private void sendMessageToAll(String message, boolean success) {
-        try {
-            if (current == firstUser) {
-                firstUser.sendMessage(String.valueOf(success));
-                secondUser.sendMessage(message);
-            } else {
-                secondUser.sendMessage(String.valueOf(success));
-                firstUser.sendMessage(message);
-            }
-            changeCurrent();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (current == firstUser) {
+            firstUser.sendMessage(String.valueOf(success));
+            secondUser.sendMessage(message);
+        } else {
+            secondUser.sendMessage(String.valueOf(success));
+            firstUser.sendMessage(message);
         }
+        changeCurrent();
     }
 
     private void changeCurrent() {
-        if (current == firstUser) {
-            current = secondUser;
-        } else {
-            secondUser = firstUser;
-        }
+        current = current == firstUser ? secondUser : firstUser;
+        timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
