@@ -38,6 +38,14 @@ public class SocketUser implements Runnable, Closeable {
         writer.println(message);
     }
 
+    public String getUsername() {
+        return user.getUsername();
+    }
+
+    public Integer getId() {
+        return user.getId();
+    }
+
     @Override
     public void close() throws IOException {
         reader.close();

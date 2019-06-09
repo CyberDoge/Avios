@@ -1,4 +1,4 @@
-package io.ssau.team.Avios.socketController;
+package io.ssau.team.Avios.socketService;
 
 import io.ssau.team.Avios.service.SocketDistribution;
 import org.springframework.beans.factory.annotation.Autowired;

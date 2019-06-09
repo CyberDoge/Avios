@@ -3,9 +3,9 @@ package io.ssau.team.Avios.service;
 import io.ssau.team.Avios.dao.TokenDao;
 import io.ssau.team.Avios.dao.UserDao;
 import io.ssau.team.Avios.model.User;
-import io.ssau.team.Avios.socketController.ChatController;
 import io.ssau.team.Avios.socketModel.Chat;
 import io.ssau.team.Avios.socketModel.SocketUser;
+import io.ssau.team.Avios.socketService.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ public class SocketDistribution {
     private UserDao userDao;
 
     @Autowired
-    private ChatController chatController;
+    private ChatService chatService;
 
     public void start(ServerSocket serverSocket) {
         CompletableFuture.runAsync(() -> {
@@ -49,7 +49,7 @@ public class SocketDistribution {
                     SocketUser socketUser = new SocketUser(socket, user, chat);
                     chat.setUser(socketUser);
                     if (chat.isReady()) {
-                        chatController.addChat(chat);
+                        chatService.addChat(chat);
                         chat = null;
                     }
                 } catch (IOException e) {

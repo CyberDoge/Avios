@@ -21,7 +21,7 @@ public class ThemeDao {
     }
 
     public Theme create(Theme theme) {
-        theme.setId(themes.size()+1);
+        theme.setId(themes.size() + 1);
         themes.add(theme);
         return theme;
     }
@@ -41,26 +41,24 @@ public class ThemeDao {
 
 
     public LinkedList<Theme> getThemesFrom(int index) {
-        //todo баг
         LinkedList<Theme> listTheme = new LinkedList<>();
-        if (index == 0) {
-            listTheme.add(themes.get(themes.size() - 1));
-        } else if (index == 1) {
-            if (themes.size() < 10) {
-                listTheme.addAll(themes);
-            } else {
-                for (int i = themes.size() - 1; i > themes.size() - 11; i--) {
-                    listTheme.push(themes.get(i));
-                }
-            }
+        int from = index * 10;
+        if (themes.size() < from) {
+            //если номер больше чем количество тем - возвращаем пустой
+            return listTheme;
         }
+        //выщитываем нужное колличество и заполняем
+        for (int size = themes.size() > from + 10 ? from + 10 : themes.size(); from < size; from++) {
+            listTheme.add(themes.get(from));
+        }
+
         return listTheme;
     }
 
     public void subscribeUserToTheme(Integer id, Integer userId, boolean agree) {
         if (agree) {
             themes.get(id).getVotedYes().add(userId);
-        }else {
+        } else {
             themes.get(id).getVotedNo().add(userId);
         }
     }

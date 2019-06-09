@@ -44,7 +44,7 @@ public class Chat extends Thread implements Closeable {
     }
 
     public void readMessage(String message, SocketUser sender) {
-        if (rounds == 19 || message == null) {
+        if (message == null) {
             //todo end of game
         } else if (current == sender) {
             timer.cancel();
@@ -65,6 +65,25 @@ public class Chat extends Thread implements Closeable {
         }
     }
 
+    private void endGame() {
+        //todo
+        try {
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void userLeaved() {
+        //todo
+        try {
+            sendMessageToAll(current.getUsername() + " leaved game", false);
+            endGame();
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void close() throws IOException {
@@ -90,5 +109,13 @@ public class Chat extends Thread implements Closeable {
                 task.run();
             }
         }, TIME_FOR_OUT);
+    }
+
+    public SocketUser getFirstUser() {
+        return firstUser;
+    }
+
+    public SocketUser getSecondUser() {
+        return secondUser;
     }
 }
