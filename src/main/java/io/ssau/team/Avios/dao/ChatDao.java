@@ -1,6 +1,6 @@
 package io.ssau.team.Avios.dao;
 
-import io.ssau.team.Avios.socketModel.Chat;
+import io.ssau.team.Avios.socketModel.db_model.ChatDb;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -8,14 +8,14 @@ import java.util.LinkedList;
 
 @Repository
 public class ChatDao {
-    private static final ArrayList<Chat> chats = new ArrayList<>();
+    private static final ArrayList<ChatDb> chats = new ArrayList<>();
 
-    public void add(Chat chat) {
+    public void add(ChatDb chat) {
         chats.add(chat);
     }
 
-    public LinkedList<Chat> getChatFrom(int index) {
-        LinkedList<Chat> listChat = new LinkedList<>();
+    public LinkedList<ChatDb> getChatFrom(int index) {
+        LinkedList<ChatDb> listChat = new LinkedList<>();
         int from = index * 10;
         if (chats.size() < from) {
             //если номер больше чем количество тем - возвращаем пустой

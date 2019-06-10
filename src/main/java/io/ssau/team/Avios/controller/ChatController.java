@@ -20,6 +20,6 @@ public class ChatController {
 
     @GetMapping(path = "/chat/{id}")
     public List<ChatJson> getChats(@PathVariable("id") Integer id) {
-        chatService.
+        return chatService.getChatsFrom(id);
     }
 }

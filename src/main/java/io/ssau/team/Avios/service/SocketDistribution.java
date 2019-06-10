@@ -17,14 +17,16 @@ import java.util.concurrent.CompletableFuture;
 
 @Component
 public class SocketDistribution {
-    @Autowired
     private TokenDao tokenDao;
-
-    @Autowired
     private UserDao userDao;
+    private ChatService chatService;
 
     @Autowired
-    private ChatService chatService;
+    public SocketDistribution(TokenDao tokenDao, UserDao userDao, ChatService chatService) {
+        this.tokenDao = tokenDao;
+        this.userDao = userDao;
+        this.chatService = chatService;
+    }
 
     public void start(ServerSocket serverSocket) {
         CompletableFuture.runAsync(() -> {

@@ -1,10 +1,10 @@
 package io.ssau.team.Avios.socketModel;
 
+import io.ssau.team.Avios.socketModel.json.MessageJson;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Chat extends Thread implements Closeable {
     private static final Random random = new Random();
@@ -18,23 +18,35 @@ public class Chat extends Thread implements Closeable {
     private Runnable task;
     private Timer timer;
     private int rounds = 0;
+    private List<MessageJson> messages;
+    //todo set theme
+    private Integer themeId;
 
     public Chat() {
         id = random.nextInt();
+    }
+
+    public Integer getThemeId() {
+        return themeId;
     }
 
     public Integer getChatId() {
         return id;
     }
 
+    public List<MessageJson> getMessages() {
+        return messages;
+    }
+
     public void run() {
+        messages = new ArrayList<>(20);
         current = firstUser;
         opponent = secondUser;
         new Thread(firstUser).start();
         new Thread(secondUser).start();
         this.timer = new Timer(true);
         //таймер на 60 секунд
-        task = () -> sendMessageToAll("timeout", false);
+        task = () -> sendMessageToAll(new MessageJson("timeout"), false);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -43,9 +55,9 @@ public class Chat extends Thread implements Closeable {
         }, TIME_FOR_OUT);
     }
 
-    public void readMessage(String message, SocketUser sender) {
+    public void readMessage(MessageJson message, SocketUser sender) {
         if (message == null) {
-            //todo end of game
+            userLeaved();
         } else if (current == sender) {
             timer.cancel();
             sendMessageToAll(message, true);
@@ -66,7 +78,6 @@ public class Chat extends Thread implements Closeable {
     }
 
     private void endGame() {
-        //todo
         try {
             close();
         } catch (IOException e) {
@@ -75,9 +86,8 @@ public class Chat extends Thread implements Closeable {
     }
 
     private void userLeaved() {
-        //todo
         try {
-            sendMessageToAll(current.getUsername() + " leaved game", false);
+            sendMessageToAll(new MessageJson(current.getUsername() + " leaved game"), false);
             endGame();
             close();
         } catch (IOException e) {
@@ -91,14 +101,18 @@ public class Chat extends Thread implements Closeable {
         secondUser.close();
     }
 
-    private void sendMessageToAll(String message, boolean success) {
-        current.sendMessage(String.valueOf(success));
+    private void sendMessageToAll(MessageJson message, boolean success) {
+        current.sendMessage(new MessageJson(success));
         opponent.sendMessage(message);
         changeCurrent();
     }
 
     private void changeCurrent() {
         rounds++;
+        if (rounds == 20) {
+            endGame();
+            return;
+        }
         var tmp = current;
         current = opponent;
         opponent = tmp;

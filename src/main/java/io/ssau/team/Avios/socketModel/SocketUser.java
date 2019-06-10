@@ -1,6 +1,7 @@
 package io.ssau.team.Avios.socketModel;
 
 import io.ssau.team.Avios.model.User;
+import io.ssau.team.Avios.socketModel.json.MessageJson;
 
 import java.io.*;
 import java.net.Socket;
@@ -34,7 +35,7 @@ public class SocketUser implements Runnable, Closeable {
         }
     }
 
-    public void sendMessage(String message) {
+    public void sendMessage(MessageJson message) {
         writer.println(message);
     }
 
