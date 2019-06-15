@@ -33,7 +33,10 @@ public class SocketUser implements Runnable, Closeable {
                 chat.readMessage(reader.readLine(), this);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            //если чат закончен - нормальная ошибка
+            if (!chat.isEnded()) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -52,9 +55,9 @@ public class SocketUser implements Runnable, Closeable {
     @Override
     public void close() {
         try {
+            socket.close();
             reader.close();
             writer.close();
-            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

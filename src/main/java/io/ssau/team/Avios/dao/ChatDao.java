@@ -34,4 +34,8 @@ public class ChatDao {
 
         return listChat;
     }
+
+    public void deleteChatById(Integer chatId) {
+        chats.removeIf(chatDb -> Objects.equals(chatDb.id, chatId));
+    }
 }
