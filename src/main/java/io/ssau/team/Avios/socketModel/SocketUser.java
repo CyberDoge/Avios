@@ -1,6 +1,7 @@
 package io.ssau.team.Avios.socketModel;
 
 import io.ssau.team.Avios.model.User;
+import io.ssau.team.Avios.socketModel.json.MessageJson;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,7 +16,6 @@ public class SocketUser implements Runnable, Closeable {
 
     public SocketUser(Socket socket, User user, Chat chat) throws IOException {
         this.socket = socket;
-        //socket.setSoTimeout(6000); todo timeout
         this.user = user;
         this.chat = chat;
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -35,8 +35,16 @@ public class SocketUser implements Runnable, Closeable {
         }
     }
 
-    public void sendMessage(String message) {
+    public void sendMessage(MessageJson message) {
         writer.println(message);
+    }
+
+    public String getUsername() {
+        return user.getUsername();
+    }
+
+    public Integer getId() {
+        return user.getId();
     }
 
     @Override

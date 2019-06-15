@@ -1,50 +1,66 @@
 package io.ssau.team.Avios.socketModel;
 
+import io.ssau.team.Avios.socketModel.json.MessageJson;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Chat extends Thread implements Closeable {
     private static final Random random = new Random();
+    private static final Integer TIME_FOR_OUT = 60 * 1000;
     private SocketUser firstUser;
     private SocketUser secondUser;
     private SocketUser current;
+    private SocketUser opponent;
     private Integer id;
     private boolean ready = false;
     private Runnable task;
     private Timer timer;
+    private int rounds = 0;
+    private List<MessageJson> messages;
+    //todo set theme
+    private Integer themeId;
 
     public Chat() {
         id = random.nextInt();
+    }
+
+    public Integer getThemeId() {
+        return themeId;
     }
 
     public Integer getChatId() {
         return id;
     }
 
+    public List<MessageJson> getMessages() {
+        return messages;
+    }
+
     public void run() {
+        messages = new ArrayList<>(20);
         current = firstUser;
+        opponent = secondUser;
         new Thread(firstUser).start();
         new Thread(secondUser).start();
         this.timer = new Timer(true);
         //таймер на 60 секунд
-        task = () -> sendMessageToAll("timeout", false);
+        task = () -> sendMessageToAll(new MessageJson(Integer.MAX_VALUE, "timeout"), false);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 task.run();
             }
-        }, 60000);
+        }, TIME_FOR_OUT);
     }
 
     public void readMessage(String message, SocketUser sender) {
         if (message == null) {
-            //todo end of game
+            userLeaved();
         } else if (current == sender) {
             timer.cancel();
-            sendMessageToAll(message, true);
+            sendMessageToAll(new MessageJson(sender.getId(), message), true);
         }
     }
 
@@ -61,6 +77,23 @@ public class Chat extends Thread implements Closeable {
         }
     }
 
+    private void endGame() {
+        try {
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void userLeaved() {
+        try {
+            sendMessageToAll(new MessageJson(current.getId(), current.getUsername() + " leaved game"), false);
+            endGame();
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void close() throws IOException {
@@ -68,25 +101,35 @@ public class Chat extends Thread implements Closeable {
         secondUser.close();
     }
 
-    private void sendMessageToAll(String message, boolean success) {
-        if (current == firstUser) {
-            firstUser.sendMessage(String.valueOf(success));
-            secondUser.sendMessage(message);
-        } else {
-            secondUser.sendMessage(String.valueOf(success));
-            firstUser.sendMessage(message);
-        }
+    private void sendMessageToAll(MessageJson message, boolean success) {
+        current.sendMessage(new MessageJson(success));
+        opponent.sendMessage(message);
         changeCurrent();
     }
 
     private void changeCurrent() {
-        current = current == firstUser ? secondUser : firstUser;
+        rounds++;
+        if (rounds == 20) {
+            endGame();
+            return;
+        }
+        var tmp = current;
+        current = opponent;
+        opponent = tmp;
         timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 task.run();
             }
-        }, 6000);
+        }, TIME_FOR_OUT);
+    }
+
+    public SocketUser getFirstUser() {
+        return firstUser;
+    }
+
+    public SocketUser getSecondUser() {
+        return secondUser;
     }
 }
