@@ -31,14 +31,18 @@ public class ThemeDao {
     }
 
 
-    public Theme getById(int id) {
-        return themes.stream().filter(theme -> Objects.equals(theme.getId(), id)).findFirst().get();
+    public Theme getById(Integer id) {
+        return themes.stream().filter(theme -> Objects.equals(theme.getId(), id)).findFirst().orElse(null);
     }
 
     public List<Theme> getAll() {
         return themes;
     }
 
+    public void deleteUserFromQueue(Integer firstUserId, Integer secondUserId, Integer themeId) {
+        getById(themeId).getVotedNo().removeIf(i -> Objects.equals(firstUserId, i) || Objects.equals(secondUserId, i));
+        getById(themeId).getVotedYes().removeIf(i -> Objects.equals(firstUserId, i) || Objects.equals(secondUserId, i));
+    }
 
     public LinkedList<Theme> getThemesFrom(int index) {
         LinkedList<Theme> listTheme = new LinkedList<>();
@@ -57,9 +61,9 @@ public class ThemeDao {
 
     public void subscribeUserToTheme(Integer id, Integer userId, boolean agree) {
         if (agree) {
-            themes.get(id).getVotedYes().add(userId);
+            getById(id).getVotedYes().add(userId);
         } else {
-            themes.get(id).getVotedNo().add(userId);
+            getById(id).getVotedNo().add(userId);
         }
     }
 }

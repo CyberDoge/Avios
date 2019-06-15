@@ -22,8 +22,9 @@ public class Chat extends Thread implements Closeable {
     //todo set theme
     private Integer themeId;
 
-    public Chat() {
-        id = random.nextInt();
+    public Chat(Integer id, Integer themeId) {
+        this.id = id;
+        this.themeId = themeId;
     }
 
     public Integer getThemeId() {
@@ -68,13 +69,15 @@ public class Chat extends Thread implements Closeable {
         return ready;
     }
 
-    public void setUser(SocketUser socketUser) {
+    public boolean setUser(SocketUser socketUser) {
+        socketUser.setChat(this);
         if (firstUser == null) {
             this.firstUser = socketUser;
         } else {
             this.secondUser = socketUser;
             this.ready = true;
         }
+        return this.ready;
     }
 
     private void endGame() {
