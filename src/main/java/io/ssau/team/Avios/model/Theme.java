@@ -16,6 +16,7 @@ public class Theme {
     //проголосовавшие за и против
     private List<Integer> votedYes;
     private List<Integer> votedNo;
+    private Boolean end;
 
 
     public Theme(Integer id, String name, String comment) {
@@ -24,6 +25,7 @@ public class Theme {
         this.comment = comment;
         votedYes = new LinkedList<>();
         votedNo = new LinkedList<>();
+        end = false;
     }
 
     public Theme() {
@@ -36,6 +38,14 @@ public class Theme {
         this.comment = themeJson.comment;
         votedYes = new LinkedList<>();
         votedNo = new LinkedList<>();
+    }
+
+    public Boolean getEnd() {
+        return end;
+    }
+
+    public void setEnd(Boolean end) {
+        this.end = end;
     }
 
     public List<Integer> getVotedYes() {

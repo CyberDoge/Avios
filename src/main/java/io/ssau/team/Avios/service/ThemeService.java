@@ -43,7 +43,6 @@ public class ThemeService {
                     return new Room(id, votedYesUserId, votedNoUserId);
                 }).collect(Collectors.toList());
         readyRooms.forEach(room -> {
-            themeDao.deleteById(room.getThemeId());
             //удаляем все остальные ожидающие темы у юзера
             themeDao.deleteUserFromQueue(room.getVotedNoUserId(), room.getVotedYesUserId(), room.getThemeId());
             userDao.deleteThemesQueue(room.getVotedNoUserId());
