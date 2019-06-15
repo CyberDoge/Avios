@@ -3,7 +3,6 @@ package io.ssau.team.Avios.service;
 import io.ssau.team.Avios.dao.TokenDao;
 import io.ssau.team.Avios.dao.UserDao;
 import io.ssau.team.Avios.model.User;
-import io.ssau.team.Avios.socketModel.Chat;
 import io.ssau.team.Avios.socketModel.SocketUser;
 import io.ssau.team.Avios.socketService.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +29,8 @@ public class SocketDistribution {
 
     public void start(ServerSocket serverSocket) {
         CompletableFuture.runAsync(() -> {
-            Chat chat = new Chat();
             while (true) {
                 try {
-                    if (chat == null) {
-                        chat = new Chat();
-                    }
                     //todo проблема если юзер так и не законектится
                     Socket socket = serverSocket.accept();
                     final char[] userUUID = new char[36];
@@ -48,12 +43,7 @@ public class SocketDistribution {
                         socket.close();
                         continue;
                     }
-                    SocketUser socketUser = new SocketUser(socket, user, chat);
-                    chat.setUser(socketUser);
-                    if (chat.isReady()) {
-                        chatService.addChat(chat);
-                        chat = null;
-                    }
+                    chatService.addConnectedUserToChat(new SocketUser(socket, user));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

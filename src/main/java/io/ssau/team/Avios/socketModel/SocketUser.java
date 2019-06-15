@@ -14,15 +14,17 @@ public class SocketUser implements Runnable, Closeable {
 
     private Chat chat;
 
-    public SocketUser(Socket socket, User user, Chat chat) throws IOException {
+    public SocketUser(Socket socket, User user) throws IOException {
         this.socket = socket;
         this.user = user;
-        this.chat = chat;
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         writer = new PrintWriter(socket.getOutputStream());
 
     }
 
+    public void setChat(Chat chat) {
+        this.chat = chat;
+    }
 
     @Override
     public void run() {
@@ -48,9 +50,13 @@ public class SocketUser implements Runnable, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        reader.close();
-        writer.close();
-        socket.close();
+    public void close() {
+        try {
+            reader.close();
+            writer.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

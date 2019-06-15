@@ -30,6 +30,12 @@ public class UserDao {
         return users.stream().filter(user-> user.getUsername().equalsIgnoreCase(username)).findAny().orElse(null);
     }
 
+    public void deleteThemesQueue(Integer userId) {
+        User userById = getUserById(userId);
+        userById.getVoteNoThemes().clear();
+        //todo проверить что сохранилось
+    }
+
     public User create(String username) {
         User user = new User(users.size()+1, username);
         users.add(user);

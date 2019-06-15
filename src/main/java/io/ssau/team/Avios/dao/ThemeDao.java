@@ -39,6 +39,10 @@ public class ThemeDao {
         return themes;
     }
 
+    public void deleteUserFromQueue(Integer firstUserId, Integer secondUserId, Integer themeId) {
+        getById(themeId).getVotedNo().removeIf(i -> Objects.equals(firstUserId, i) || Objects.equals(secondUserId, i));
+        getById(themeId).getVotedYes().removeIf(i -> Objects.equals(firstUserId, i) || Objects.equals(secondUserId, i));
+    }
 
     public LinkedList<Theme> getThemesFrom(int index) {
         LinkedList<Theme> listTheme = new LinkedList<>();

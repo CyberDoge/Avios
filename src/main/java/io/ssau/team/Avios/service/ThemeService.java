@@ -6,6 +6,7 @@ import io.ssau.team.Avios.dao.UserDao;
 import io.ssau.team.Avios.model.Room;
 import io.ssau.team.Avios.model.Theme;
 import io.ssau.team.Avios.model.json.ThemeJson;
+import io.ssau.team.Avios.socketService.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,12 +22,14 @@ public class ThemeService {
     private ThemeDao themeDao;
     private RoomDao roomDao;
     private UserDao userDao;
+    private ChatService chatService;
 
     @Autowired
-    public ThemeService(ThemeDao themeDao, RoomDao roomDao, UserDao userDao) {
+    public ThemeService(ThemeDao themeDao, RoomDao roomDao, UserDao userDao, ChatService chatService) {
         this.themeDao = themeDao;
         this.roomDao = roomDao;
         this.userDao = userDao;
+        this.chatService = chatService;
     }
 
     @Scheduled(fixedDelay = 5000)
@@ -39,7 +42,15 @@ public class ThemeService {
                     final Integer id = theme.getId();
                     return new Room(id, votedYesUserId, votedNoUserId);
                 }).collect(Collectors.toList());
-        readyRooms.forEach(room -> themeDao.deleteById(room.getThemeId()));
+        readyRooms.forEach(room -> {
+            themeDao.deleteById(room.getThemeId());
+            //удаляем все остальные ожидающие темы у юзера
+            themeDao.deleteUserFromQueue(room.getVotedNoUserId(), room.getVotedYesUserId(), room.getThemeId());
+            userDao.deleteThemesQueue(room.getVotedNoUserId());
+            userDao.deleteThemesQueue(room.getVotedYesUserId());
+            //создаем чат
+            chatService.createChat(room.getVotedNoUserId(), room.getVotedYesUserId(), room.getThemeId());
+        });
         roomDao.addAll(readyRooms);
     }
 
