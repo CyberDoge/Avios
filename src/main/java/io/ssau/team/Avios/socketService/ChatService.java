@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,17 +29,19 @@ public class ChatService {
         return chatDao.getChatFrom(id).stream().map(ChatJson::new).collect(Collectors.toList());
     }
 
+    //todo закрывать и удалять все чаты после игры или по окончанию таймаута ожидания!
     public void addConnectedUserToChat(SocketUser socketUser) {
-        findChatByUserId(socketUser.getId()).ifPresentOrElse(c -> {
-            if (c.setUser(socketUser)) {
-                c.start();
+        //сначала ищем в бд есть ли такая комната и юзер с такой комнотой
+        chatDao.getChatWithUser(socketUser.getId()).ifPresentOrElse(c -> {
+            Chat chat = findChatById(c.id);
+            if (chat.setUser(socketUser)) {
+                chat.start();
             }
         }, socketUser::close);
     }
 
-    private Optional<Chat> findChatByUserId(Integer userId) {
-        return chatsToRun.stream().filter(chat -> (Objects.equals(userId, chat.getFirstUser().getId())
-                || Objects.equals(userId, chat.getSecondUser().getId())) && !chat.isReady()).findFirst();
+    private Chat findChatById(Integer id) {
+        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId()) && !chat.isReady()).findFirst().get();
     }
 
     public void createChat(Integer firstUserId, Integer secondUserId, Integer themeId) {

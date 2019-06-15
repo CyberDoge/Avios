@@ -32,6 +32,12 @@ public class ThemeService {
         this.chatService = chatService;
     }
 
+    @Scheduled(fixedDelay = Integer.MAX_VALUE)
+    public void onlyForTest() {
+        //subscribeToTheme(2, 4, true);
+        //subscribeToTheme(2, 5, false);
+    }
+
     @Scheduled(fixedDelay = 5000)
     public void createRoom() {
         final List<Room> readyRooms = this.themeDao.getAll().parallelStream()

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 public class ChatDao {
@@ -12,6 +14,10 @@ public class ChatDao {
 
     public void add(ChatDb chat) {
         chats.add(chat);
+    }
+
+    public Optional<ChatDb> getChatWithUser(Integer userId) {
+        return chats.stream().filter(chat -> (Objects.equals(userId, chat.firstUserId) || Objects.equals(userId, chat.secondUserId))).findFirst();
     }
 
     public LinkedList<ChatDb> getChatFrom(int index) {
