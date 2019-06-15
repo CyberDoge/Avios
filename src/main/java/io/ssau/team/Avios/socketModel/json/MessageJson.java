@@ -11,7 +11,8 @@ public class MessageJson {
         this.success = success;
     }
 
-    public MessageJson(String message) {
+    public MessageJson(Integer userId, String message) {
+        this.userId = userId;
         this.message = message;
     }
 

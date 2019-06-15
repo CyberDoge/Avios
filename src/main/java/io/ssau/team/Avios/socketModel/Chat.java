@@ -46,7 +46,7 @@ public class Chat extends Thread implements Closeable {
         new Thread(secondUser).start();
         this.timer = new Timer(true);
         //таймер на 60 секунд
-        task = () -> sendMessageToAll(new MessageJson("timeout"), false);
+        task = () -> sendMessageToAll(new MessageJson(Integer.MAX_VALUE, "timeout"), false);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -55,12 +55,12 @@ public class Chat extends Thread implements Closeable {
         }, TIME_FOR_OUT);
     }
 
-    public void readMessage(MessageJson message, SocketUser sender) {
+    public void readMessage(String message, SocketUser sender) {
         if (message == null) {
             userLeaved();
         } else if (current == sender) {
             timer.cancel();
-            sendMessageToAll(message, true);
+            sendMessageToAll(new MessageJson(sender.getId(), message), true);
         }
     }
 
@@ -87,7 +87,7 @@ public class Chat extends Thread implements Closeable {
 
     private void userLeaved() {
         try {
-            sendMessageToAll(new MessageJson(current.getUsername() + " leaved game"), false);
+            sendMessageToAll(new MessageJson(current.getId(), current.getUsername() + " leaved game"), false);
             endGame();
             close();
         } catch (IOException e) {
