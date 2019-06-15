@@ -17,11 +17,11 @@ Avios это студенческий проект.
 
 ### Установка
 
-Для запуска проекта нужен java 11, mysql и maven.
+Для запуска проекта нужен java 12, mysql и maven.
 
 Установка окружения
 ```sh
-$ sudo apt install git openjdk-11-jre-headless maven mariadb-server
+$ sudo apt install git openjdk-12-jre-headless maven mariadb-server
 ```
 
 Установка и сборка проекта
