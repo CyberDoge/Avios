@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -32,14 +33,23 @@ public class SocketDistribution {
         CompletableFuture.runAsync(() -> {
             while (true) {
                 try {
-                    //todo проблема если юзер так и не законектится
                     Socket socket = serverSocket.accept();
+                    socket.setSoTimeout(4000);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    User user = userDao.get(tokenDao.get(reader.readLine()));
+                    String token;
+                    try {
+                        token = reader.readLine();
+                    } catch (SocketTimeoutException e) {
+                        socket.close();
+                        reader.close();
+                        continue;
+                    }
+                    User user = userDao.get(tokenDao.get(token));
                     if (user == null) {
                         socket.close();
                         continue;
                     }
+                    socket.setSoTimeout(0);
                     chatService.addConnectedUserToChat(new SocketUser(socket, user));
                 } catch (IOException e) {
                     e.printStackTrace();

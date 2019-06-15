@@ -1,6 +1,7 @@
 package io.ssau.team.Avios.socketService;
 
 import io.ssau.team.Avios.dao.ChatDao;
+import io.ssau.team.Avios.dao.ThemeDao;
 import io.ssau.team.Avios.socketModel.Chat;
 import io.ssau.team.Avios.socketModel.SocketUser;
 import io.ssau.team.Avios.socketModel.db_model.ChatDb;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -18,10 +20,12 @@ public class ChatService {
 
     private List<Chat> chatsToRun;
     private ChatDao chatDao;
+    private ThemeDao themeDao;
 
     @Autowired
-    public ChatService(ChatDao chatDao) {
+    public ChatService(ChatDao chatDao, ThemeDao themeDao) {
         this.chatDao = chatDao;
+        this.themeDao = themeDao;
         chatsToRun = new ArrayList<>();
     }
 
@@ -29,19 +33,23 @@ public class ChatService {
         return chatDao.getChatFrom(id).stream().map(ChatJson::new).collect(Collectors.toList());
     }
 
-    //todo закрывать и удалять все чаты после игры или по окончанию таймаута ожидания!
     public void addConnectedUserToChat(SocketUser socketUser) {
         //сначала ищем в бд есть ли такая комната и юзер с такой комнотой
         chatDao.getChatWithUser(socketUser.getId()).ifPresentOrElse(c -> {
-            Chat chat = findChatById(c.id);
-            if (chat.setUser(socketUser)) {
-                chat.start();
-            }
+            findNotStartedChatById(c.id).ifPresentOrElse(chat -> {
+                if (chat.setUser(socketUser)) {
+                    chat.start();
+                }
+            }, socketUser::close);
         }, socketUser::close);
     }
 
+    private Optional<Chat> findNotStartedChatById(Integer id) {
+        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId()) && !chat.isReady()).findFirst();
+    }
+
     private Chat findChatById(Integer id) {
-        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId()) && !chat.isReady()).findFirst().get();
+        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId())).findFirst().get();
     }
 
     public void createChat(Integer firstUserId, Integer secondUserId, Integer themeId) {
@@ -51,7 +59,13 @@ public class ChatService {
         chatDb.secondUserId = secondUserId;
         chatDb.themeId = themeId;
         chatDao.add(chatDb);
-        chatsToRun.add(new Chat(chatDb.id, themeId));
+        chatsToRun.add(new Chat(this, chatDb.id, themeId));
+    }
+
+    public void deleteChat(Integer chatId) {
+        themeDao.deleteById(findChatById(chatId).getThemeId());
+        chatsToRun.removeIf(chat -> Objects.equals(chat.getChatId(), chatId));
+        chatDao.deleteChatById(chatId);
     }
 
 

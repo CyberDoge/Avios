@@ -34,8 +34,8 @@ public class ThemeService {
 
     @Scheduled(fixedDelay = Integer.MAX_VALUE)
     public void onlyForTest() {
-        //subscribeToTheme(2, 4, true);
-        //subscribeToTheme(2, 5, false);
+        subscribeToTheme(2, 4, true);
+        subscribeToTheme(2, 5, false);
     }
 
     @Scheduled(fixedDelay = 5000)

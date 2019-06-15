@@ -1,13 +1,15 @@
 package io.ssau.team.Avios.socketModel;
 
 import io.ssau.team.Avios.socketModel.json.MessageJson;
+import io.ssau.team.Avios.socketService.ChatService;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Chat extends Thread implements Closeable {
-    private static final Random random = new Random();
     private static final Integer TIME_FOR_OUT = 60 * 1000;
     private SocketUser firstUser;
     private SocketUser secondUser;
@@ -15,16 +17,28 @@ public class Chat extends Thread implements Closeable {
     private SocketUser opponent;
     private Integer id;
     private boolean ready = false;
+    private boolean ended = false;
     private Runnable task;
-    private Timer timer;
+    private Timer roundsTimer;
     private int rounds = 0;
     private List<MessageJson> messages;
-    //todo set theme
+    private ChatService chatService;
     private Integer themeId;
 
-    public Chat(Integer id, Integer themeId) {
+    public Chat(ChatService chatService, Integer id, Integer themeId) {
+        this.chatService = chatService;
         this.id = id;
         this.themeId = themeId;
+        Timer connectionTimer = new Timer(true);
+        //таймер ожидает 10 секунд, и если хотя бы 1 игрок не подключаться, то заканчиваем игру
+        connectionTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!ready) {
+                    endGame();
+                }
+            }
+        }, 10 * 1000);
     }
 
     public Integer getThemeId() {
@@ -45,10 +59,10 @@ public class Chat extends Thread implements Closeable {
         opponent = secondUser;
         new Thread(firstUser).start();
         new Thread(secondUser).start();
-        this.timer = new Timer(true);
+        this.roundsTimer = new Timer(true);
         //таймер на 60 секунд
         task = () -> sendMessageToAll(new MessageJson(Integer.MAX_VALUE, "timeout"), false);
-        timer.schedule(new TimerTask() {
+        roundsTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 task.run();
@@ -60,7 +74,7 @@ public class Chat extends Thread implements Closeable {
         if (message == null) {
             userLeaved();
         } else if (current == sender) {
-            timer.cancel();
+            roundsTimer.cancel();
             sendMessageToAll(new MessageJson(sender.getId(), message), true);
         }
     }
@@ -80,28 +94,29 @@ public class Chat extends Thread implements Closeable {
         return this.ready;
     }
 
+    public boolean isEnded() {
+        return ended;
+    }
+
     private void endGame() {
-        try {
-            close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ended = true;
+        close();
     }
 
     private void userLeaved() {
-        try {
-            sendMessageToAll(new MessageJson(current.getId(), current.getUsername() + " leaved game"), false);
-            endGame();
-            close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendMessageToAll(new MessageJson(current.getId(), current.getUsername() + " leaved game"), false);
+        endGame();
     }
 
     @Override
-    public void close() throws IOException {
-        firstUser.close();
-        secondUser.close();
+    public void close() {
+        if (firstUser != null) {
+            firstUser.close();
+        }
+        if (secondUser != null) {
+            secondUser.close();
+        }
+        this.chatService.deleteChat(this.id);
     }
 
     private void sendMessageToAll(MessageJson message, boolean success) {
@@ -119,8 +134,8 @@ public class Chat extends Thread implements Closeable {
         var tmp = current;
         current = opponent;
         opponent = tmp;
-        timer = new Timer(true);
-        timer.schedule(new TimerTask() {
+        roundsTimer = new Timer(true);
+        roundsTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 task.run();

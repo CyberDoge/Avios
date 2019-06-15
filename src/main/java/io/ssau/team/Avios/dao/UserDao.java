@@ -33,7 +33,7 @@ public class UserDao {
     public void deleteThemesQueue(Integer userId) {
         User userById = getUserById(userId);
         userById.getVoteNoThemes().clear();
-        //todo проверить что сохранилось
+        userById.getVoteYesThemes().clear();
     }
 
     public User create(String username) {
