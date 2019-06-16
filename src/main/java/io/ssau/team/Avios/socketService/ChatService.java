@@ -4,21 +4,22 @@ import io.ssau.team.Avios.dao.ChatDao;
 import io.ssau.team.Avios.dao.ThemeDao;
 import io.ssau.team.Avios.socketModel.Chat;
 import io.ssau.team.Avios.socketModel.SocketUser;
+import io.ssau.team.Avios.socketModel.SocketViewer;
 import io.ssau.team.Avios.socketModel.db_model.ChatDb;
 import io.ssau.team.Avios.socketModel.json.ChatJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class ChatService {
 
-    private List<Chat> chatsToRun;
+    private Map<Integer, Chat> chatsToRun;
     private ChatDao chatDao;
     private ThemeDao themeDao;
 
@@ -26,7 +27,11 @@ public class ChatService {
     public ChatService(ChatDao chatDao, ThemeDao themeDao) {
         this.chatDao = chatDao;
         this.themeDao = themeDao;
-        chatsToRun = new ArrayList<>();
+        chatsToRun = new HashMap<>();
+    }
+
+    public void voteForMessage(Integer chatId, Integer messageIndex, Integer userId) {
+        findChatById(chatId).ifPresent(chat -> chat.voteForMessage(messageIndex, userId));
     }
 
     public List<ChatJson> getChatsFrom(Integer id) {
@@ -44,27 +49,41 @@ public class ChatService {
         }, socketUser::close);
     }
 
-    private Optional<Chat> findNotStartedChatById(Integer id) {
-        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId()) && !chat.isReady()).findFirst();
+    public void addViewerToChat(SocketViewer socketViewer, String themeId) {
+        try {
+            findChatById(Integer.parseInt(themeId)).ifPresentOrElse(chat -> {
+                chat.addSocketViewer(socketViewer);
+            }, socketViewer::close);
+        } catch (NumberFormatException e) {
+            socketViewer.close();
+        }
     }
 
-    private Chat findChatById(Integer id) {
-        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId())).findFirst().get();
+    private Optional<Chat> findNotStartedChatById(Integer id) {
+        Chat value = chatsToRun.get(id);
+        if (value != null && !value.isEnded()) {
+            return Optional.of(value);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Chat> findChatById(Integer id) {
+        return Optional.ofNullable(chatsToRun.get(id));
     }
 
     public void createChat(Integer firstUserId, Integer secondUserId, Integer themeId) {
         ChatDb chatDb = new ChatDb();
-        chatDb.id = (int) (Math.random() * Integer.MAX_VALUE);
+        chatDb.id = 1;
         chatDb.firstUserId = firstUserId;
         chatDb.secondUserId = secondUserId;
         chatDb.themeId = themeId;
         chatDao.add(chatDb);
-        chatsToRun.add(new Chat(this, chatDb.id, themeId));
+        chatsToRun.put(chatDb.id, new Chat(this, chatDb.id, themeId));
     }
 
     public void deleteChat(Integer chatId) {
-        themeDao.deleteById(findChatById(chatId).getThemeId());
-        chatsToRun.removeIf(chat -> Objects.equals(chat.getChatId(), chatId));
+        findChatById(chatId).ifPresent(theme -> themeDao.deleteById(theme.getThemeId()));
+        chatsToRun.remove(chatId);
         chatDao.deleteChatById(chatId);
     }
 

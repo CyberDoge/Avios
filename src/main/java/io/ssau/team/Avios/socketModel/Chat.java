@@ -4,6 +4,7 @@ import io.ssau.team.Avios.socketModel.json.MessageJson;
 import io.ssau.team.Avios.socketService.ChatService;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -22,6 +23,7 @@ public class Chat extends Thread implements Closeable {
     private Timer roundsTimer;
     private int rounds = 0;
     private List<MessageJson> messages;
+    private List<SocketViewer> socketViewers;
     private ChatService chatService;
     private Integer themeId;
 
@@ -38,7 +40,7 @@ public class Chat extends Thread implements Closeable {
                     endGame();
                 }
             }
-        }, 10 * 1000);
+        }, 10000 * 1000);
     }
 
     public Integer getThemeId() {
@@ -55,6 +57,7 @@ public class Chat extends Thread implements Closeable {
 
     public void run() {
         messages = new ArrayList<>(20);
+        socketViewers = new ArrayList<>();
         current = firstUser;
         opponent = secondUser;
         new Thread(firstUser).start();
@@ -94,6 +97,16 @@ public class Chat extends Thread implements Closeable {
         return this.ready;
     }
 
+    public void addSocketViewer(SocketViewer socketViewer) {
+        this.socketViewers.add(socketViewer);
+        try {
+            socketViewer.sendAllMessages(messages);
+        } catch (IOException e) {
+            socketViewer.close();
+            socketViewers.remove(socketViewer);
+        }
+    }
+
     public boolean isEnded() {
         return ended;
     }
@@ -120,9 +133,32 @@ public class Chat extends Thread implements Closeable {
     }
 
     private void sendMessageToAll(MessageJson message, boolean success) {
+        messages.add(message);
         current.sendMessage(new MessageJson(success));
         opponent.sendMessage(message);
+        for (int i = 0; i < socketViewers.size(); i++) {
+            try {
+                socketViewers.get(i).sendMessage(message);
+            } catch (IOException e) {
+                socketViewers.get(i).close();
+                socketViewers.remove(i);
+            }
+        }
         changeCurrent();
+    }
+
+    private void notifyVote(boolean up, Integer messageId) {
+        MessageJson message = new MessageJson(Integer.MAX_VALUE, messageId + ":" + up);
+        current.sendMessage(message);
+        opponent.sendMessage(message);
+        for (int i = 0; i < socketViewers.size(); i++) {
+            try {
+                socketViewers.get(i).sendMessage(message);
+            } catch (IOException e) {
+                socketViewers.get(i).close();
+                socketViewers.remove(i);
+            }
+        }
     }
 
     private void changeCurrent() {
@@ -149,5 +185,12 @@ public class Chat extends Thread implements Closeable {
 
     public SocketUser getSecondUser() {
         return secondUser;
+    }
+
+    public void voteForMessage(Integer messageIndex, Integer userId) {
+        if (messages.size() > messageIndex) {
+            //send message to all that message# voted up or down
+            notifyVote(messages.get(messageIndex).vote(userId), messageIndex);
+        }
     }
 }
