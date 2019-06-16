@@ -4,6 +4,7 @@ import io.ssau.team.Avios.dao.TokenDao;
 import io.ssau.team.Avios.dao.UserDao;
 import io.ssau.team.Avios.model.User;
 import io.ssau.team.Avios.socketModel.SocketUser;
+import io.ssau.team.Avios.socketModel.SocketViewer;
 import io.ssau.team.Avios.socketService.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,8 +48,7 @@ public class SocketDistribution {
                     socket.setSoTimeout(0);
                     if (input.startsWith("theme:")) {
                         String themeId = input.substring(6);
-
-
+                        chatService.addViewerToChat(new SocketViewer(socket), themeId);
                     } else {
                         User user = userDao.get(tokenDao.get(input));
                         if (user == null) {

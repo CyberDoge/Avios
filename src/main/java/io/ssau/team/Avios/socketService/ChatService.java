@@ -10,16 +10,16 @@ import io.ssau.team.Avios.socketModel.json.ChatJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class ChatService {
 
-    private List<Chat> chatsToRun;
+    private Map<Integer, Chat> chatsToRun;
     private ChatDao chatDao;
     private ThemeDao themeDao;
 
@@ -27,7 +27,11 @@ public class ChatService {
     public ChatService(ChatDao chatDao, ThemeDao themeDao) {
         this.chatDao = chatDao;
         this.themeDao = themeDao;
-        chatsToRun = new ArrayList<>();
+        chatsToRun = new HashMap<>();
+    }
+
+    public void voteForMessage(Integer chatId, Integer messageIndex, Integer userId) {
+        findChatById(chatId).ifPresent(chat -> chat.voteForMessage(messageIndex, userId));
     }
 
     public List<ChatJson> getChatsFrom(Integer id) {
@@ -56,11 +60,15 @@ public class ChatService {
     }
 
     private Optional<Chat> findNotStartedChatById(Integer id) {
-        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId()) && !chat.isReady()).findFirst();
+        Chat value = chatsToRun.get(id);
+        if (value != null && !value.isEnded()) {
+            return Optional.of(value);
+        }
+        return Optional.empty();
     }
 
     private Optional<Chat> findChatById(Integer id) {
-        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId())).findFirst();
+        return Optional.of(chatsToRun.get(id));
     }
 
     public void createChat(Integer firstUserId, Integer secondUserId, Integer themeId) {
@@ -70,12 +78,12 @@ public class ChatService {
         chatDb.secondUserId = secondUserId;
         chatDb.themeId = themeId;
         chatDao.add(chatDb);
-        chatsToRun.add(new Chat(this, chatDb.id, themeId));
+        chatsToRun.put(chatDb.id, new Chat(this, chatDb.id, themeId));
     }
 
     public void deleteChat(Integer chatId) {
         findChatById(chatId).ifPresent(theme -> themeDao.deleteById(theme.getThemeId()));
-        chatsToRun.removeIf(chat -> Objects.equals(chat.getChatId(), chatId));
+        chatsToRun.remove(chatId);
         chatDao.deleteChatById(chatId);
     }
 

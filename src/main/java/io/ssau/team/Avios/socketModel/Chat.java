@@ -4,6 +4,7 @@ import io.ssau.team.Avios.socketModel.json.MessageJson;
 import io.ssau.team.Avios.socketService.ChatService;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -98,6 +99,12 @@ public class Chat extends Thread implements Closeable {
 
     public void addSocketViewer(SocketViewer socketViewer) {
         this.socketViewers.add(socketViewer);
+        try {
+            socketViewer.sendAllMessages(messages);
+        } catch (IOException e) {
+            socketViewer.close();
+            socketViewers.remove(socketViewer);
+        }
     }
 
     public boolean isEnded() {
@@ -128,6 +135,14 @@ public class Chat extends Thread implements Closeable {
     private void sendMessageToAll(MessageJson message, boolean success) {
         current.sendMessage(new MessageJson(success));
         opponent.sendMessage(message);
+        socketViewers.forEach(socketViewer -> {
+            try {
+                socketViewer.sendMessage(message);
+            } catch (IOException e) {
+                socketViewer.close();
+                socketViewers.remove(socketViewer);
+            }
+        });
         changeCurrent();
     }
 
@@ -155,5 +170,9 @@ public class Chat extends Thread implements Closeable {
 
     public SocketUser getSecondUser() {
         return secondUser;
+    }
+
+    public void voteForMessage(Integer messageIndex, Integer userId) {
+        messages.get(messageIndex).vote(userId);
     }
 }
