@@ -40,7 +40,7 @@ public class Chat extends Thread implements Closeable {
                     endGame();
                 }
             }
-        }, 10 * 1000);
+        }, 10000 * 1000);
     }
 
     public Integer getThemeId() {
@@ -135,14 +135,14 @@ public class Chat extends Thread implements Closeable {
     private void sendMessageToAll(MessageJson message, boolean success) {
         current.sendMessage(new MessageJson(success));
         opponent.sendMessage(message);
-        socketViewers.forEach(socketViewer -> {
+        for (int i = 0; i < socketViewers.size(); i++) {
             try {
-                socketViewer.sendMessage(message);
+                socketViewers.get(i).sendMessage(message);
             } catch (IOException e) {
-                socketViewer.close();
-                socketViewers.remove(socketViewer);
+                socketViewers.get(i).close();
+                socketViewers.remove(i);
             }
-        });
+        }
         changeCurrent();
     }
 

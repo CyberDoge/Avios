@@ -51,9 +51,9 @@ public class ChatService {
 
     public void addViewerToChat(SocketViewer socketViewer, String themeId) {
         try {
-            findChatById(Integer.parseInt(themeId)).ifPresent(chat -> {
+            findChatById(Integer.parseInt(themeId)).ifPresentOrElse(chat -> {
                 chat.addSocketViewer(socketViewer);
-            });
+            }, socketViewer::close);
         } catch (NumberFormatException e) {
             socketViewer.close();
         }
@@ -68,12 +68,12 @@ public class ChatService {
     }
 
     private Optional<Chat> findChatById(Integer id) {
-        return Optional.of(chatsToRun.get(id));
+        return Optional.ofNullable(chatsToRun.get(id));
     }
 
     public void createChat(Integer firstUserId, Integer secondUserId, Integer themeId) {
         ChatDb chatDb = new ChatDb();
-        chatDb.id = (int) (Math.random() * Integer.MAX_VALUE);
+        chatDb.id = 1;
         chatDb.firstUserId = firstUserId;
         chatDb.secondUserId = secondUserId;
         chatDb.themeId = themeId;

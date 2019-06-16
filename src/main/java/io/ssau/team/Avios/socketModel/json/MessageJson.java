@@ -1,5 +1,6 @@
 package io.ssau.team.Avios.socketModel.json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MessageJson {
@@ -10,11 +11,13 @@ public class MessageJson {
 
     public MessageJson(boolean success) {
         this.success = success;
+        votedUser = new ArrayList<>();
     }
 
     public MessageJson(Integer userId, String message) {
         this.userId = userId;
         this.message = message;
+        votedUser = new ArrayList<>();
     }
 
     public void vote(Integer userId) {

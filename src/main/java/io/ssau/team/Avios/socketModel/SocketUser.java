@@ -1,5 +1,7 @@
 package io.ssau.team.Avios.socketModel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ssau.team.Avios.model.User;
 import io.ssau.team.Avios.socketModel.json.MessageJson;
 
@@ -13,13 +15,14 @@ public class SocketUser implements Runnable, Closeable {
     private User user;
 
     private Chat chat;
+    private final ObjectMapper objectMapper;
 
     public SocketUser(Socket socket, User user) throws IOException {
         this.socket = socket;
         this.user = user;
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         writer = new PrintWriter(socket.getOutputStream());
-
+        this.objectMapper = new ObjectMapper();
     }
 
     public void setChat(Chat chat) {
@@ -41,7 +44,14 @@ public class SocketUser implements Runnable, Closeable {
     }
 
     public void sendMessage(MessageJson message) {
-        writer.println(message);
+        try {
+            writer.println(objectMapper.writeValueAsString(message));
+        } catch (JsonProcessingException e) {
+            writer.println("system message: error");
+            e.printStackTrace();
+        } finally {
+            writer.flush();
+        }
     }
 
     public String getUsername() {
