@@ -20,15 +20,16 @@ public class MessageJson {
         votedUser = new ArrayList<>();
     }
 
-    public void vote(Integer userId) {
-        if (votedUser.contains(userId)) {
-            votedUser.remove(userId);
-        } else {
-            votedUser.add(userId);
-        }
+    public MessageJson() {
     }
 
-    public MessageJson() {
+    public boolean vote(Integer userId) {
+        if (votedUser.contains(userId)) {
+            votedUser.remove(userId);
+            return false;
+        }
+        votedUser.add(userId);
+        return true;
     }
 
     public Integer getUserId() {

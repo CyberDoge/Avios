@@ -133,6 +133,7 @@ public class Chat extends Thread implements Closeable {
     }
 
     private void sendMessageToAll(MessageJson message, boolean success) {
+        messages.add(message);
         current.sendMessage(new MessageJson(success));
         opponent.sendMessage(message);
         for (int i = 0; i < socketViewers.size(); i++) {
@@ -144,6 +145,20 @@ public class Chat extends Thread implements Closeable {
             }
         }
         changeCurrent();
+    }
+
+    private void notifyVote(boolean up, Integer messageId) {
+        MessageJson message = new MessageJson(Integer.MAX_VALUE, messageId + ":" + up);
+        current.sendMessage(message);
+        opponent.sendMessage(message);
+        for (int i = 0; i < socketViewers.size(); i++) {
+            try {
+                socketViewers.get(i).sendMessage(message);
+            } catch (IOException e) {
+                socketViewers.get(i).close();
+                socketViewers.remove(i);
+            }
+        }
     }
 
     private void changeCurrent() {
@@ -173,6 +188,9 @@ public class Chat extends Thread implements Closeable {
     }
 
     public void voteForMessage(Integer messageIndex, Integer userId) {
-        messages.get(messageIndex).vote(userId);
+        if (messages.size() > messageIndex) {
+            //send message to all that message# voted up or down
+            notifyVote(messages.get(messageIndex).vote(userId), messageIndex);
+        }
     }
 }
