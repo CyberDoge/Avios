@@ -22,6 +22,7 @@ public class Chat extends Thread implements Closeable {
     private Timer roundsTimer;
     private int rounds = 0;
     private List<MessageJson> messages;
+    private List<SocketViewer> socketViewers;
     private ChatService chatService;
     private Integer themeId;
 
@@ -55,6 +56,7 @@ public class Chat extends Thread implements Closeable {
 
     public void run() {
         messages = new ArrayList<>(20);
+        socketViewers = new ArrayList<>();
         current = firstUser;
         opponent = secondUser;
         new Thread(firstUser).start();
@@ -92,6 +94,10 @@ public class Chat extends Thread implements Closeable {
             this.ready = true;
         }
         return this.ready;
+    }
+
+    public void addSocketViewer(SocketViewer socketViewer) {
+        this.socketViewers.add(socketViewer);
     }
 
     public boolean isEnded() {

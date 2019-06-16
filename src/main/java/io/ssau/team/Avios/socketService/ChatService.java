@@ -4,6 +4,7 @@ import io.ssau.team.Avios.dao.ChatDao;
 import io.ssau.team.Avios.dao.ThemeDao;
 import io.ssau.team.Avios.socketModel.Chat;
 import io.ssau.team.Avios.socketModel.SocketUser;
+import io.ssau.team.Avios.socketModel.SocketViewer;
 import io.ssau.team.Avios.socketModel.db_model.ChatDb;
 import io.ssau.team.Avios.socketModel.json.ChatJson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +45,22 @@ public class ChatService {
         }, socketUser::close);
     }
 
+    public void addViewerToChat(SocketViewer socketViewer, String themeId) {
+        try {
+            findChatById(Integer.parseInt(themeId)).ifPresent(chat -> {
+                chat.addSocketViewer(socketViewer);
+            });
+        } catch (NumberFormatException e) {
+            socketViewer.close();
+        }
+    }
+
     private Optional<Chat> findNotStartedChatById(Integer id) {
         return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId()) && !chat.isReady()).findFirst();
     }
 
-    private Chat findChatById(Integer id) {
-        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId())).findFirst().get();
+    private Optional<Chat> findChatById(Integer id) {
+        return chatsToRun.stream().filter(chat -> Objects.equals(id, chat.getChatId())).findFirst();
     }
 
     public void createChat(Integer firstUserId, Integer secondUserId, Integer themeId) {
@@ -63,7 +74,7 @@ public class ChatService {
     }
 
     public void deleteChat(Integer chatId) {
-        themeDao.deleteById(findChatById(chatId).getThemeId());
+        findChatById(chatId).ifPresent(theme -> themeDao.deleteById(theme.getThemeId()));
         chatsToRun.removeIf(chat -> Objects.equals(chat.getChatId(), chatId));
         chatDao.deleteChatById(chatId);
     }

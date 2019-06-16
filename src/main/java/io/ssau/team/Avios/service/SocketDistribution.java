@@ -36,21 +36,27 @@ public class SocketDistribution {
                     Socket socket = serverSocket.accept();
                     socket.setSoTimeout(4000);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    String token;
+                    String input;
                     try {
-                        token = reader.readLine();
+                        input = reader.readLine();
                     } catch (SocketTimeoutException e) {
                         socket.close();
                         reader.close();
                         continue;
                     }
-                    User user = userDao.get(tokenDao.get(token));
-                    if (user == null) {
-                        socket.close();
-                        continue;
-                    }
                     socket.setSoTimeout(0);
-                    chatService.addConnectedUserToChat(new SocketUser(socket, user));
+                    if (input.startsWith("theme:")) {
+                        String themeId = input.substring(6);
+
+
+                    } else {
+                        User user = userDao.get(tokenDao.get(input));
+                        if (user == null) {
+                            socket.close();
+                            continue;
+                        }
+                        chatService.addConnectedUserToChat(new SocketUser(socket, user));
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
