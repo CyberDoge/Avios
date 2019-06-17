@@ -37,7 +37,7 @@ public class Chat extends Thread implements Closeable {
             @Override
             public void run() {
                 if (!ready) {
-                    endGame();
+                    close();
                 }
             }
         }, 10000 * 1000);
@@ -111,18 +111,22 @@ public class Chat extends Thread implements Closeable {
         return ended;
     }
 
-    private void endGame() {
-        ended = true;
+    private void endGame(boolean fullGame) {
+        if (fullGame) {
+            chatService.addResultsToUser(messages, current);
+        }
+        chatService.addResultsToUser(messages, opponent);
         close();
     }
 
     private void userLeaved() {
         sendMessageToAll(new MessageJson(current.getId(), current.getUsername() + " leaved game"), false);
-        endGame();
+        endGame(false);
     }
 
     @Override
     public void close() {
+        ended = true;
         if (firstUser != null) {
             firstUser.close();
         }
@@ -164,7 +168,7 @@ public class Chat extends Thread implements Closeable {
     private void changeCurrent() {
         rounds++;
         if (rounds == 20) {
-            endGame();
+            endGame(true);
             return;
         }
         var tmp = current;

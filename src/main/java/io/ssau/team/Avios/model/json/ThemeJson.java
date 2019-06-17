@@ -4,8 +4,8 @@ import io.ssau.team.Avios.model.Theme;
 
 public class ThemeJson {
     public Integer id;
-    public String name;
-    public String comment;
+    public String title;
+    public String text;
 
     //Колличество людей проголосовавших за или против
     public Integer votedYes;
@@ -14,15 +14,15 @@ public class ThemeJson {
     public ThemeJson() {
     }
 
-    public ThemeJson(String name, String comment) {
-        this.name = name;
-        this.comment = comment;
+    public ThemeJson(String title, String text) {
+        this.title = title;
+        this.text = text;
     }
 
     public ThemeJson(Theme theme) {
         this.id = theme.getId();
-        this.name = theme.getName();
-        this.comment = theme.getComment();
+        this.title = theme.getTitle();
+        this.text = theme.getText();
         this.votedYes = theme.getVotedYes().size();
         this.votedNo = theme.getVotedNo().size();
     }

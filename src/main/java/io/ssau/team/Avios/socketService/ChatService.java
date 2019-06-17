@@ -2,18 +2,18 @@ package io.ssau.team.Avios.socketService;
 
 import io.ssau.team.Avios.dao.ChatDao;
 import io.ssau.team.Avios.dao.ThemeDao;
+import io.ssau.team.Avios.dao.UserDao;
+import io.ssau.team.Avios.model.User;
 import io.ssau.team.Avios.socketModel.Chat;
 import io.ssau.team.Avios.socketModel.SocketUser;
 import io.ssau.team.Avios.socketModel.SocketViewer;
 import io.ssau.team.Avios.socketModel.db_model.ChatDb;
 import io.ssau.team.Avios.socketModel.json.ChatJson;
+import io.ssau.team.Avios.socketModel.json.MessageJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -22,11 +22,13 @@ public class ChatService {
     private Map<Integer, Chat> chatsToRun;
     private ChatDao chatDao;
     private ThemeDao themeDao;
+    private UserDao userDao;
 
     @Autowired
-    public ChatService(ChatDao chatDao, ThemeDao themeDao) {
+    public ChatService(ChatDao chatDao, ThemeDao themeDao, UserDao userDao) {
         this.chatDao = chatDao;
         this.themeDao = themeDao;
+        this.userDao = userDao;
         chatsToRun = new HashMap<>();
     }
 
@@ -88,4 +90,15 @@ public class ChatService {
     }
 
 
+    public void addResultsToUser(List<MessageJson> messages, SocketUser socketUser) {
+        User user = userDao.getUserById(socketUser.getId());
+        user.addGamesCount();
+        int count = 0;
+        for (MessageJson messageJson : messages) {
+            if (Objects.equals(messageJson.getUserId(), socketUser.getId())) {
+                count += messageJson.getVotes();
+            }
+        }
+        user.addVotesCount(count);
+    }
 }

@@ -1,5 +1,6 @@
 package io.ssau.team.Avios.controller;
 
+import io.ssau.team.Avios.model.User;
 import io.ssau.team.Avios.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class AuthController {
 
     @GetMapping("/login")
     public ResponseEntity successLogin() {
-        return ResponseEntity.status(HttpStatus.OK).body("login: " +
-                SecurityContextHolder.getContext().getAuthentication().getName());
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
     }
 }

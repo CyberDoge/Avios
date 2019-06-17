@@ -9,9 +9,9 @@ public class Theme {
 
     private Integer id;
 
-    private String name;
+    private String title;
 
-    private String comment;
+    private String text;
 
     //проголосовавшие за и против
     private List<Integer> votedYes;
@@ -19,10 +19,10 @@ public class Theme {
     private Boolean end;
 
 
-    public Theme(Integer id, String name, String comment) {
+    public Theme(Integer id, String title, String text) {
         this.id = id;
-        this.name = name;
-        this.comment = comment;
+        this.title = title;
+        this.text = text;
         votedYes = new LinkedList<>();
         votedNo = new LinkedList<>();
         end = false;
@@ -34,8 +34,8 @@ public class Theme {
     }
 
     public Theme(ThemeJson themeJson) {
-        this.name = themeJson.name;
-        this.comment = themeJson.comment;
+        this.title = themeJson.title;
+        this.text = themeJson.text;
         votedYes = new LinkedList<>();
         votedNo = new LinkedList<>();
     }
@@ -64,19 +64,19 @@ public class Theme {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getComment() {
-        return comment;
+    public String getText() {
+        return text;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setText(String text) {
+        this.text = text;
     }
 }

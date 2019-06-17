@@ -44,7 +44,7 @@ public class ThemeDao {
         getById(themeId).getVotedYes().removeIf(i -> Objects.equals(firstUserId, i) || Objects.equals(secondUserId, i));
     }
 
-    public LinkedList<Theme> getThemesFrom(int index) {
+    public List<Theme> getThemesFrom(int index) {
         LinkedList<Theme> listTheme = new LinkedList<>();
         int from = index * 10;
         if (themes.size() < from) {
