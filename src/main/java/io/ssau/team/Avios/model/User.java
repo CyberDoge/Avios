@@ -10,12 +10,30 @@ public class User {
     //темы которые выбрал юзер
     private List<Integer> voteYesThemes;
     private List<Integer> voteNoThemes;
+    private Integer votesCount;
+    private Integer gamesCount;
 
     public User(Integer id, String username) {
         this.id = id;
         this.username = username;
         voteYesThemes = new LinkedList<>();
         voteNoThemes = new LinkedList<>();
+    }
+
+    public Integer getVotesCount() {
+        return votesCount;
+    }
+
+    public void addVotesCount(int number) {
+        this.votesCount += number;
+    }
+
+    public void addGamesCount() {
+        ++this.gamesCount;
+    }
+
+    public Integer getGamesCount() {
+        return gamesCount;
     }
 
     public List<Integer> getVoteYesThemes() {

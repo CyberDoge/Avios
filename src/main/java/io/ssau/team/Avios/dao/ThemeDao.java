@@ -44,7 +44,7 @@ public class ThemeDao {
         getById(themeId).getVotedYes().removeIf(i -> Objects.equals(firstUserId, i) || Objects.equals(secondUserId, i));
     }
 
-    public LinkedList<Theme> getThemesFrom(int index) {
+    public List<Theme> getThemesFrom(int index) {
         LinkedList<Theme> listTheme = new LinkedList<>();
         int from = index * 10;
         if (themes.size() < from) {
@@ -60,10 +60,15 @@ public class ThemeDao {
     }
 
     public void subscribeUserToTheme(Integer id, Integer userId, boolean agree) {
+        Theme theme = getById(id);
         if (agree) {
-            getById(id).getVotedYes().add(userId);
+            if (theme.getVotedYes().remove(userId)) return;
+            theme.getVotedYes().add(userId);
+            theme.getVotedNo().remove(userId);
         } else {
-            getById(id).getVotedNo().add(userId);
+            if (theme.getVotedNo().remove(userId)) return;
+            theme.getVotedNo().add(userId);
+            theme.getVotedYes().remove(userId);
         }
     }
 }
