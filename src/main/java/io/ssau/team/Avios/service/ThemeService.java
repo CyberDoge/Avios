@@ -34,8 +34,8 @@ public class ThemeService {
 
     @Scheduled(fixedDelay = Integer.MAX_VALUE)
     public void onlyForTest() {
-        subscribeToTheme(2, 4, true);
-        subscribeToTheme(2, 5, false);
+        //subscribeToTheme(2, 4, true);
+        //subscribeToTheme(2, 5, false);
     }
 
     @Scheduled(fixedDelay = 5000)
@@ -67,8 +67,8 @@ public class ThemeService {
         return new ThemeJson(theme);
     }
 
-    public List<ThemeJson> getThemeList(int index) {
-        return themeDao.getThemesFrom(index).stream().map(ThemeJson::new).collect(Collectors.toList());
+    public List<ThemeJson> getThemeList(int index, Integer userId) {
+        return themeDao.getThemesFrom(index).stream().map(theme -> new ThemeJson(theme, userId)).collect(Collectors.toList());
     }
 
     public ThemeJson getReadyTheme(Integer userId) {

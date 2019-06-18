@@ -7,6 +7,8 @@ public class ThemeJson {
     public String title;
     public String text;
 
+    public Boolean voted;
+
     //Колличество людей проголосовавших за или против
     public Integer votedYes;
     public Integer votedNo;
@@ -25,5 +27,20 @@ public class ThemeJson {
         this.text = theme.getText();
         this.votedYes = theme.getVotedYes().size();
         this.votedNo = theme.getVotedNo().size();
+    }
+
+    public ThemeJson(Theme theme, Integer userId) {
+        this.id = theme.getId();
+        this.title = theme.getTitle();
+        this.text = theme.getText();
+        this.votedYes = theme.getVotedYes().size();
+        this.votedNo = theme.getVotedNo().size();
+        if (theme.getVotedNo().contains(userId)) {
+            voted = false;
+        } else if (theme.getVotedYes().contains(userId)) {
+            voted = true;
+        } else {
+            voted = null;
+        }
     }
 }

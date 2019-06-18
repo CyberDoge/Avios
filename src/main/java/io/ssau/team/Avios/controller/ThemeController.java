@@ -29,7 +29,8 @@ public class ThemeController {
 
     @GetMapping("/theme/{id}")
     public List<ThemeJson> getThemes(@PathVariable("id") Integer id) {
-        return this.themeService.getThemeList(id);
+        Integer userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        return this.themeService.getThemeList(id, userId);
     }
 
     @GetMapping("/theme/check")
