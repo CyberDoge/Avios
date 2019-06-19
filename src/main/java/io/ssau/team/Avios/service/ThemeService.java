@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -68,7 +70,11 @@ public class ThemeService {
     }
 
     public List<ThemeJson> getThemeList(int index, Integer userId) {
-        return themeDao.getThemesFrom(index).stream().map(theme -> new ThemeJson(theme, userId)).collect(Collectors.toList());
+        List<Theme> themesFrom = themeDao.getThemesFrom(index);
+        if(themesFrom.isEmpty()){
+            throw new HttpClientErrorException(HttpStatus.NO_CONTENT);
+        }
+        return themesFrom.stream().map(theme -> new ThemeJson(theme, userId)).collect(Collectors.toList());
     }
 
     public ThemeJson getReadyTheme(Integer userId) {
