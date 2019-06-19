@@ -27,7 +27,11 @@ public class ThemeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(themeService.createTheme(theme));
     }
 
-    @GetMapping("/theme/{id}")
+    @GetMapping("/themes/{id}")
+    public ThemeJson getThemeById(@PathVariable("id") Integer id) {
+        return this.themeService.getTheme(id);
+    }
+    @GetMapping("/themes/{id}")
     public List<ThemeJson> getThemes(@PathVariable("id") Integer id) {
         Integer userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         return this.themeService.getThemeList(id, userId);

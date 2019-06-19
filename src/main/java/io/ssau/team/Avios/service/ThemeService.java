@@ -90,4 +90,8 @@ public class ThemeService {
         userDao.subscribeToTheme(id, userId, agree);
         return true;
     }
+
+    public ThemeJson getTheme(Integer id) {
+        return new ThemeJson(themeDao.getById(id));
+    }
 }

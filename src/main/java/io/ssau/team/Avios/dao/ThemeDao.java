@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,17 +44,13 @@ public class ThemeDao {
     }
 
     public List<Theme> getThemesFrom(int index) {
-        LinkedList<Theme> listTheme = new LinkedList<>();
+        ArrayList<Theme> listTheme = new ArrayList<>(10);
         int from = index * 10;
-        if (themes.size() < from) {
-            //если номер больше чем количество тем - возвращаем пустой
-            return listTheme;
-        }
-        //выщитываем нужное колличество и заполняем
-        for (int size = themes.size() > from + 10 ? from + 10 : themes.size(); from < size; from++) {
-            listTheme.add(themes.get(from));
-        }
 
+        //выщитываем нужное колличество и заполняем
+        for (int i = themes.size() - 1 - from, n = i - 10; i > n && i >= 0; i--) {
+            listTheme.add(themes.get(i));
+        }
         return listTheme;
     }
 

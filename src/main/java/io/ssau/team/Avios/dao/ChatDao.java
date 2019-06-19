@@ -20,18 +20,14 @@ public class ChatDao {
         return chats.stream().filter(chat -> (Objects.equals(userId, chat.firstUserId) || Objects.equals(userId, chat.secondUserId))).findFirst();
     }
 
-    public LinkedList<ChatDb> getChatFrom(int index) {
-        LinkedList<ChatDb> listChat = new LinkedList<>();
+    public ArrayList<ChatDb> getChatFrom(int index) {
+        ArrayList<ChatDb> listChat = new ArrayList<>(10);
         int from = index * 10;
-        if (chats.size() < from) {
-            //если номер больше чем количество тем - возвращаем пустой
-            return listChat;
-        }
-        //выщитываем нужное колличество и заполняем
-        for (int size = chats.size() > from + 10 ? from + 10 : chats.size(); from < size; from++) {
-            listChat.add(chats.get(from));
-        }
 
+        //выщитываем нужное колличество и заполняем
+        for (int i = chats.size() - 1 - from, n = i - 10; i > n && i >= 0; i--) {
+            listChat.add(chats.get(i));
+        }
         return listChat;
     }
 
