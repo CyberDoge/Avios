@@ -119,7 +119,7 @@ public class Chat extends Thread implements Closeable {
         close();
     }
 
-    private void userLeaved() {
+    void userLeaved() {
         sendMessageToAll(new MessageJson(current.getId(), current.getUsername() + " leaved game"), false);
         endGame(false);
     }
@@ -181,6 +181,11 @@ public class Chat extends Thread implements Closeable {
                 task.run();
             }
         }, TIME_FOR_OUT);
+    }
+
+    public void setCurrent(SocketUser current) {
+        this.opponent = this.current;
+        this.current = current;
     }
 
     public SocketUser getFirstUser() {

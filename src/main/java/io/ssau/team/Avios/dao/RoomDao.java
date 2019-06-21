@@ -27,6 +27,16 @@ public class RoomDao {
         }
     }
 
+    public void removeByThemeId(Integer themeId){
+        Iterator<Room> iterator = rooms.iterator();
+        while (iterator.hasNext()) {
+            if (Objects.equals(iterator.next().getThemeId(), themeId)) {
+                iterator.remove();
+                break;
+            }
+        }
+    }
+
     public Optional<Room> getByUserId(Integer userId) {
         return rooms.parallelStream().filter(room ->
                 Objects.equals(room.getVotedYesUserId(), userId) || Objects.equals(room.getVotedNoUserId(), userId)

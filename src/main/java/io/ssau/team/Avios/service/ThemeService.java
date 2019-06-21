@@ -36,8 +36,8 @@ public class ThemeService {
 
     @Scheduled(fixedDelay = Integer.MAX_VALUE)
     public void onlyForTest() {
-        //subscribeToTheme(2, 4, true);
-        //subscribeToTheme(2, 5, false);
+        subscribeToTheme(2, 4, true);
+        subscribeToTheme(2, 5, false);
     }
 
     @Scheduled(fixedDelay = 5000)
@@ -87,11 +87,12 @@ public class ThemeService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         themeDao.subscribeUserToTheme(id, userId, agree);
-        userDao.subscribeToTheme(id, userId, agree);
-        return true;
+        return userDao.subscribeToTheme(id, userId, agree);
     }
 
     public ThemeJson getTheme(Integer id) {
-        return new ThemeJson(themeDao.getById(id));
+        Theme theme = themeDao.getById(id);
+        if(theme == null) throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+        return new ThemeJson(theme);
     }
 }

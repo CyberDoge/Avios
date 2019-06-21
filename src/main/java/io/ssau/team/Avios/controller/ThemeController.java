@@ -27,7 +27,7 @@ public class ThemeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(themeService.createTheme(theme));
     }
 
-    @GetMapping("/themes/{id}")
+    @GetMapping("/theme/{id}")
     public ThemeJson getThemeById(@PathVariable("id") Integer id) {
         return this.themeService.getTheme(id);
     }
@@ -46,19 +46,17 @@ public class ThemeController {
     }
 
     @PutMapping("/theme/vote-up/{id}")
-    public ResponseEntity subscribeToThemeAndVoteUp(@PathVariable("id") Integer id) {
-        themeService.subscribeToTheme(id,
+    public ResponseEntity<Boolean> subscribeToThemeAndVoteUp(@PathVariable("id") Integer id) {
+        return new ResponseEntity<>(themeService.subscribeToTheme(id,
                 ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId(),
-                true);
-        return new ResponseEntity(HttpStatus.OK);
+                true), HttpStatus.OK);
     }
 
     @PutMapping("/theme/vote-down/{id}")
-    public ResponseEntity subscribeToThemeAndVoteDown(@PathVariable("id") Integer id) {
-        themeService.subscribeToTheme(id,
+    public ResponseEntity<Boolean> subscribeToThemeAndVoteDown(@PathVariable("id") Integer id) {
+        return new ResponseEntity<>(themeService.subscribeToTheme(id,
                 ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId(),
-                false);
-        return new ResponseEntity(HttpStatus.OK);
+                false), HttpStatus.OK);
     }
 
 }

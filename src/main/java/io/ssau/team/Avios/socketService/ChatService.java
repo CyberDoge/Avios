@@ -1,6 +1,7 @@
 package io.ssau.team.Avios.socketService;
 
 import io.ssau.team.Avios.dao.ChatDao;
+import io.ssau.team.Avios.dao.RoomDao;
 import io.ssau.team.Avios.dao.ThemeDao;
 import io.ssau.team.Avios.dao.UserDao;
 import io.ssau.team.Avios.model.User;
@@ -23,12 +24,14 @@ public class ChatService {
     private ChatDao chatDao;
     private ThemeDao themeDao;
     private UserDao userDao;
+    private RoomDao roomDao;
 
     @Autowired
-    public ChatService(ChatDao chatDao, ThemeDao themeDao, UserDao userDao) {
+    public ChatService(ChatDao chatDao, ThemeDao themeDao, UserDao userDao, RoomDao roomDao) {
         this.chatDao = chatDao;
         this.themeDao = themeDao;
         this.userDao = userDao;
+        this.roomDao = roomDao;
         chatsToRun = new HashMap<>();
     }
 
@@ -84,7 +87,10 @@ public class ChatService {
     }
 
     public void deleteChat(Integer chatId) {
-        findChatById(chatId).ifPresent(theme -> themeDao.deleteById(theme.getThemeId()));
+        findChatById(chatId).ifPresent(theme -> {
+            themeDao.deleteById(theme.getThemeId());
+            roomDao.removeByThemeId(theme.getThemeId());
+        });
         chatsToRun.remove(chatId);
         chatDao.deleteChatById(chatId);
     }

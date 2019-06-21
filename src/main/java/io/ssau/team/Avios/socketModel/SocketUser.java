@@ -38,7 +38,8 @@ public class SocketUser implements Runnable, Closeable {
         } catch (IOException e) {
             //если чат закончен - нормальная ошибка
             if (!chat.isEnded()) {
-                e.printStackTrace();
+                chat.setCurrent(this);
+                chat.userLeaved();
             }
         }
     }
