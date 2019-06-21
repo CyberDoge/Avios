@@ -40,7 +40,7 @@ public class Chat extends Thread implements Closeable {
                     close();
                 }
             }
-        }, 10000 * 1000);
+        }, 10 * 1000);
     }
 
     public Integer getThemeId() {
@@ -64,7 +64,7 @@ public class Chat extends Thread implements Closeable {
         new Thread(secondUser).start();
         this.roundsTimer = new Timer(true);
         //таймер на 60 секунд
-        task = () -> sendMessageToAll(new MessageJson(Integer.MAX_VALUE, "timeout"), false);
+        task = () -> sendMessageToAll(new MessageJson(messages.size(), Integer.MAX_VALUE, "timeout", false));
         roundsTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -78,7 +78,7 @@ public class Chat extends Thread implements Closeable {
             userLeaved();
         } else if (current == sender) {
             roundsTimer.cancel();
-            sendMessageToAll(new MessageJson(sender.getId(), message), true);
+            sendMessageToAll(new MessageJson(messages.size(), sender.getId(), message, true));
         }
     }
 
@@ -120,7 +120,7 @@ public class Chat extends Thread implements Closeable {
     }
 
     void userLeaved() {
-        sendMessageToAll(new MessageJson(current.getId(), current.getUsername() + " leaved game"), false);
+        sendMessageToAll(new MessageJson(messages.size(), current.getId(), current.getUsername() + " leaved game", false));
         endGame(false);
     }
 
@@ -136,9 +136,9 @@ public class Chat extends Thread implements Closeable {
         this.chatService.deleteChat(this.id);
     }
 
-    private void sendMessageToAll(MessageJson message, boolean success) {
+    private void sendMessageToAll(MessageJson message) {
         messages.add(message);
-        current.sendMessage(new MessageJson(success));
+        current.sendMessage(new MessageJson(message));
         opponent.sendMessage(message);
         for (int i = 0; i < socketViewers.size(); i++) {
             try {
@@ -152,7 +152,7 @@ public class Chat extends Thread implements Closeable {
     }
 
     private void notifyVote(boolean up, Integer messageId) {
-        MessageJson message = new MessageJson(Integer.MAX_VALUE, messageId + ":" + up);
+        MessageJson message = new MessageJson(messages.size(), Integer.MAX_VALUE, messageId + ":" + up, true);
         current.sendMessage(message);
         opponent.sendMessage(message);
         for (int i = 0; i < socketViewers.size(); i++) {
@@ -197,6 +197,7 @@ public class Chat extends Thread implements Closeable {
     }
 
     public void voteForMessage(Integer messageIndex, Integer userId) {
+        --messageIndex;
         if (messages.size() > messageIndex) {
             //send message to all that message# voted up or down
             notifyVote(messages.get(messageIndex).vote(userId), messageIndex);

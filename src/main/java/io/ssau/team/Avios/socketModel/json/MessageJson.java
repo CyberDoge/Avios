@@ -4,21 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageJson {
+    private Integer id;
     private Integer userId;
     private String message;
     private boolean success;
     private List<Integer> votedUser;
 
-    public MessageJson(boolean success) {
+    public MessageJson(Integer id, Integer userId, String message, boolean success) {
+        this.id = id;
+        this.userId = userId;
+        this.message = message;
         this.success = success;
         votedUser = new ArrayList<>();
     }
 
-    public MessageJson(Integer userId, String message) {
-        this.userId = userId;
-        this.message = message;
+
+    public MessageJson(MessageJson messageJson) {
+        this.id = messageJson.id;
+        this.userId = messageJson.userId == Integer.MAX_VALUE ? Integer.MAX_VALUE : -1;
+        this.message = messageJson.message;
+        this.success = messageJson.success;
         votedUser = new ArrayList<>();
     }
+
 
     public MessageJson() {
     }
@@ -38,6 +46,10 @@ public class MessageJson {
 
     public int getVotes() {
         return votedUser.size();
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public String getMessage() {

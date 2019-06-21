@@ -18,6 +18,8 @@ public class User {
         this.username = username;
         voteYesThemes = new LinkedList<>();
         voteNoThemes = new LinkedList<>();
+        gamesCount = 0;
+        votesCount = 0;
     }
 
     public Integer getVotesCount() {
