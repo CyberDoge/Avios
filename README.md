@@ -1,8 +1,5 @@
 # Avios
 
-
-[![Build Status]https://github.com/CyberDoge/Avios/](https://travis-ci.org/joemccann/dillinger)
-
 Avios это студенческий проект.
 
 ### Технологии
